@@ -1,0 +1,45 @@
+volumes:
+  postgres_data:
+  redis_data:
+
+services:
+  postgres_task:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tasks
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      retries: 5
+    restart: always
+
+  redis_task:
+    image: redis:7
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 5
+    restart: always
+
+  task_service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@postgres_task:5432/tasks
+      REDIS_URL: redis://redis_task:6379
+    depends_on:
+      postgres_task:
+        condition: service_healthy
+      redis_task:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    command: sh -c "bun prisma migrate deploy && bun prisma generate && bun run src/http/server.ts"
+    restart: always

@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: tasks
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Bun
+        run: curl -fsSL https://bun.sh/install | bash
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run migrations
+        run: bun prisma migrate deploy
+
+      - name: Seed database
+        run: bun run src/seed/seed.ts
+
+      - name: Start server in background
+        run: bun run src/http/server.ts &
+      
+      - name: Wait for server
+        run: sleep 5
+
+      - name: Run API tests
+        run: bash test_api.sh
