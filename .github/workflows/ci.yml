@@ -36,9 +36,6 @@ jobs:
       - name: Run migrations
         run: bun prisma migrate deploy
 
-      - name: Seed database
-        run: bun run src/seed/seed.ts
-
       - name: Start server in background
         run: bun run src/http/server.ts &
       
