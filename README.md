@@ -104,3 +104,16 @@ curl -X DELETE http://localhost:3000/tasks/<id>
 ```
 npx vitest run
 ```
+Асинхронные уведомления:
+
+```
+docker compose logs worker
+```
+
+```
+worker-1         | NOTIFICATION: {
+worker-1         |   type: "due_soon",
+worker-1         |   taskId: "bfa90bb8-d94b-4a4d-9417-0e1a0ea7ac98",
+worker-1         |   dueDate: "2025-11-06T18:00:00.000Z",
+worker-1         | }
+```
