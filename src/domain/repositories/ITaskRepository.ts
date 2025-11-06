@@ -6,5 +6,5 @@ export interface ITaskRepository {
   findAll(filter?: { status?: string }): Promise<Task[]>;
   update(task: Task): Promise<Task>;
   delete(id: string): Promise<void>;
-  findDueWithin(hours: number): Promise<Task[]>; // for notifications
+  findDueWithin(hours: number): Promise<Task[]>;
 }

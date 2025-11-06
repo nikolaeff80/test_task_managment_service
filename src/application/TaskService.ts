@@ -1,23 +1,25 @@
+import { NotFoundError, ValidationError } from "../utils/errors";
 import { ITaskRepository } from "../domain/repositories/ITaskRepository";
 import { Task } from "../domain/entities/Task";
 import { z } from "zod";
+import { tr } from "zod/v4/locales";
 
 const CreateTaskSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
-  dueDate: z.string().optional(), // ISO
+  dueDate: z.string().datetime().optional(),
 });
 
 export class TaskService {
   constructor(private repo: ITaskRepository, private queueProducer: (payload:any)=>Promise<void>) {}
 
   async create(input: unknown) {
+    try {
     const data = CreateTaskSchema.parse(input);
     const due = data.dueDate ? new Date(data.dueDate) : undefined;
     const task = new Task({ title: data.title, description: data.description, dueDate: due });
     const created = await this.repo.create(task);
 
-    // if due within 24 hours → push to queue
     if (created.dueDate) {
       const ms = created.dueDate.getTime() - Date.now();
       const hours = ms / (1000*60*60);
@@ -26,6 +28,9 @@ export class TaskService {
       }
     }
     return created;
+    } catch (err) {
+      throw new ValidationError(err);
+    }
   }
 
   async list(status?: string) {
@@ -34,7 +39,7 @@ export class TaskService {
 
   async getById(id: string) {
     const t = await this.repo.findById(id);
-    if (!t) throw new Error("TaskNotFound");
+    if (!t) throw new NotFoundError("TaskNotFound");
     return t;
   }
 

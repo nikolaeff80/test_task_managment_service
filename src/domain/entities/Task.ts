@@ -1,5 +1,3 @@
-// domain/entities/Task.ts
-
 export type TaskStatus = "pending" | "completed";
 
 export interface TaskProps {
@@ -30,33 +28,25 @@ export class Task {
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
 
-    this.validate(); // автоматическая валидация при создании
+    this.validate();
   }
 
-  /**
-   * Проверка инвариантов доменной модели (DDD)
-   */
+
   private validate() {
-    // Заголовок
     if (!this.title || this.title.length === 0) {
       throw new Error("Task title is required.");
     }
 
-    // Дата дедлайна не в прошлом
     if (this.dueDate && this.dueDate.getTime() < Date.now()) {
       throw new Error("Due date cannot be in the past.");
     }
 
-    // Допустимый статус
     const validStatuses: TaskStatus[] = ["pending", "completed"];
     if (!validStatuses.includes(this.status)) {
       throw new Error(`Invalid task status: ${this.status}`);
     }
   }
 
-  /**
-   * Изменение данных задачи с повторной проверкой инвариантов
-   */
   update(fields: Partial<Omit<TaskProps, "id" | "createdAt" | "updatedAt">>) {
     if (fields.title !== undefined) this.title = fields.title.trim();
     if (fields.description !== undefined) this.description = fields.description;

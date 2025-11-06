@@ -41,5 +41,22 @@ services:
         condition: service_healthy
     ports:
       - "3000:3000"
-    command: sh -c "bun prisma migrate deploy && bun prisma generate && bun run src/http/server.ts"
+    command: >
+      sh -c "
+      bun prisma migrate deploy &&
+      bun prisma generate &&
+      bun run src/http/server.ts
+      "
+    restart: always
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      REDIS_URL: redis://redis_task:6379
+    depends_on:
+      redis_task:
+        condition: service_healthy
+    command: bun run src/infrastructure/queue/worker.ts
     restart: always
