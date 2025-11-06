@@ -38,3 +38,69 @@
 * Обработка ошибок: Централизованная и корректная обработка ошибок на разных слоях.
 * Валидация данных: Валидация входящих данных на уровне Application Layer или Domain Layer.
 * Чистый код: Код должен быть читаемым, хорошо структурированным и следовать общепринятым стандартам.
+
+# Реализация
+
+### 1. Клонируйте репозиторий
+```bash
+git clone https://github.com/your-org/task_management_service.git
+cd task_management_service
+```
+### 2. Настройте окружение
+
+Создайте файл .env
+```
+# Application
+PORT=3000
+HOST=0.0.0.0
+NODE_ENV=development
+
+# Database
+DATABASE_URL=postgresql://postgres:postgres@db:5432/tasks_db?schema=public
+
+# Redis
+REDIS_URL=redis://redis:6379
+``` 
+
+### 3. Запустите через Docker Compose
+
+```bash
+docker compose up --build
+```
+
+Приложение будет доступно по адресу: http://localhost:3000
+
+### 4. Проверка работоспособности
+
+Создать задачу:
+```
+curl -X POST http://localhost:3000/tasks \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Test task","description":"Check status","dueDate":"2025-11-10T12:00:00Z"}'
+```
+
+Получить все задачи:
+
+```
+curl http://localhost:3000/tasks
+```
+
+Обновить задачу:
+
+```
+curl -X PUT http://localhost:3000/tasks/<id> \
+  -H "Content-Type: application/json" \
+  -d '{"status":"completed"}'
+```
+
+Удалить задачу:
+
+```
+curl -X DELETE http://localhost:3000/tasks/<id>
+```
+
+Тесты основных CRUD-операций:
+
+```
+npx vitest run
+```
